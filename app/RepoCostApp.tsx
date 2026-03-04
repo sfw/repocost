@@ -349,7 +349,7 @@ export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
               fontSize: 12, color: "#777", letterSpacing: "0.14em", textTransform: "uppercase",
               marginBottom: 20, fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
             }}>
-              What would it actually cost to build?
+              What would it actually cost to build without AI?
             </div>
             <h1 style={{
               fontSize: "clamp(44px, 9vw, 68px)", fontWeight: 700, margin: "0 0 12px",
@@ -697,6 +697,35 @@ export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
           )}
         </div>
       )}
+
+      {/* ─── BROUGHT TO YOU BY ─── */}
+      <a
+        href="https://www.hackedpodcast.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          position: "fixed", bottom: 20, right: 20, zIndex: 100,
+          display: "flex", alignItems: "center", gap: 8,
+          textDecoration: "none", opacity: 0.6,
+          transition: "opacity 0.2s",
+        }}
+        onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
+        onMouseLeave={e => (e.currentTarget.style.opacity = "0.6")}
+      >
+        <span style={{
+          fontSize: 10, color: "#666", letterSpacing: "0.1em",
+          textTransform: "uppercase", fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
+          whiteSpace: "nowrap",
+        }}>
+          Brought to you by
+        </span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/hacked.webp"
+          alt="Hacked Podcast"
+          style={{ height: 28, width: "auto", filter: "invert(1) brightness(0.75)" }}
+        />
+      </a>
     </div>
   );
 }
