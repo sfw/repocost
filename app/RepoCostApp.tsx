@@ -480,7 +480,10 @@ export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
                 <img src={meta.owner.avatar_url} alt="" width={32} height={32} style={{ borderRadius: 8 }} />
               )}
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, fontSize: 17 }}>{meta.full_name}</div>
+                <a href={meta.html_url} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 700, fontSize: 17, color: "inherit", textDecoration: "none" }}
+                  onMouseEnter={e => (e.currentTarget.style.textDecoration = "underline")}
+                  onMouseLeave={e => (e.currentTarget.style.textDecoration = "none")}
+                >{meta.full_name}</a>
                 {meta.description && (
                   <div style={{ fontSize: 13, color: "#555", marginTop: 2 }}>
                     {meta.description.slice(0, 100)}{meta.description.length > 100 ? "…" : ""}
@@ -499,7 +502,7 @@ export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
             background: "linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.06))",
             border: "1px solid rgba(255,255,255,0.08)",
             borderRadius: 20, padding: "40px 28px 28px", marginBottom: 16,
-            position: "relative", overflow: "hidden",
+            position: "relative", overflow: "visible",
           }}>
             <div style={{
               position: "absolute", top: -80, right: -80, width: 240, height: 240,
