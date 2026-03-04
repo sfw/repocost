@@ -7,6 +7,7 @@ import {
 import type { TooltipProps } from "recharts";
 import type { Estimate, LangEstimate } from "@/lib/estimate";
 import { fmt, fmtCost, fmtBigCost, fmtDur } from "@/lib/estimate";
+import type { RecentSearch } from "@/lib/kv";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -223,6 +224,19 @@ function drawReceipt(canvas: HTMLCanvasElement, data: Estimate, meta: RepoMeta) 
   ctx.fillText(`${fmt(data.hours)} total hours`, barL, ry);
 }
 
+// ─── Time Ago ────────────────────────────────────────────────────────────────
+
+function timeAgo(ts: number): string {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return "just now";
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  return `${d}d ago`;
+}
+
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
@@ -238,6 +252,14 @@ export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
   const [showMethodology, setShowMethodology] = useState(false);
   const [copied, setCopied] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
+
+  useEffect(() => {
+    fetch("/api/recent")
+      .then((r) => r.ok ? r.json() : [])
+      .then((data) => setRecentSearches(data))
+      .catch(() => {});
+  }, []);
 
   const analyze = useCallback(async (repoStr?: string) => {
     const val = repoStr || input;
@@ -395,6 +417,46 @@ export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
                 >{r}</button>
               ))}
             </div>
+
+            {recentSearches.length > 0 && (
+              <div style={{ marginTop: 40, width: "100%" }}>
+                <div style={{
+                  fontSize: 10, color: "#333", letterSpacing: "0.12em", textTransform: "uppercase",
+                  marginBottom: 10, fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
+                }}>
+                  Recently analyzed
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  {recentSearches.slice(0, 8).map((s) => (
+                    <button
+                      key={s.repo + s.ts}
+                      onClick={() => { setInput(s.repo); analyze(s.repo); }}
+                      style={{
+                        width: "100%", padding: "8px 14px",
+                        background: "rgba(255,255,255,0.02)",
+                        border: "1px solid rgba(255,255,255,0.04)",
+                        borderRadius: 8, cursor: "pointer",
+                        display: "flex", alignItems: "center", gap: 10,
+                        transition: "all 0.15s", textAlign: "left",
+                      }}
+                    >
+                      <span style={{
+                        flex: 1, fontSize: 12, color: "#666",
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                      }}>{s.repo}</span>
+                      <span style={{ fontSize: 11, color: "#444", fontFamily: "'IBM Plex Mono', monospace", fontWeight: 600 }}>
+                        {fmtCost(s.cost)}
+                      </span>
+                      {s.stars > 0 && (
+                        <span style={{ fontSize: 10, color: "#333" }}>★ {fmt(s.stars)}</span>
+                      )}
+                      <span style={{ fontSize: 10, color: "#2a2a2a", whiteSpace: "nowrap" }}>{timeAgo(s.ts)}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

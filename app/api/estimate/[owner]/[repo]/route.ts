@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchRepoData } from "@/lib/github";
 import { estimate } from "@/lib/estimate";
+import { recordSearch } from "@/lib/kv";
 
 export const runtime = "edge"; // Fast cold starts, runs at edge
 
@@ -27,6 +28,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
     }
 
     const est = estimate(data.languages);
+
+    void recordSearch({ repo: `${owner}/${repo}`, cost: est.cost, stars: data.meta.stargazers_count, ts: Date.now() });
 
     return NextResponse.json(
       { meta: data.meta, estimate: est },
