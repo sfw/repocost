@@ -42,6 +42,34 @@ function Counter({ to, format, dur = 1400 }: { to: number; format: (v: number) =
   return <>{format(v)}</>;
 }
 
+// ─── Hover Tooltip ──────────────────────────────────────────────────────────
+
+function Tip({ text, children }: { text: string; children: React.ReactNode }) {
+  const [show, setShow] = useState(false);
+  return (
+    <span
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+      style={{ position: "relative", borderBottom: "1px dashed rgba(255,255,255,0.2)", cursor: "help" }}
+    >
+      {children}
+      {show && (
+        <span style={{
+          position: "absolute", bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)",
+          background: "#16162a", border: "1px solid #2a2a3e", borderRadius: 8,
+          padding: "8px 12px", fontSize: 12, color: "#ccc", lineHeight: 1.5,
+          maxWidth: 280, width: "max-content", textAlign: "left",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.5)", zIndex: 50,
+          pointerEvents: "none", whiteSpace: "normal", fontWeight: 400,
+          letterSpacing: "normal", textTransform: "none",
+        }}>
+          {text}
+        </span>
+      )}
+    </span>
+  );
+}
+
 // ─── Receipt Canvas (downloadable PNG) ──────────────────────────────────────
 
 function drawReceipt(canvas: HTMLCanvasElement, data: Estimate, meta: RepoMeta) {
@@ -400,7 +428,7 @@ export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
             <div style={{
               fontSize: 11, color: "#555", letterSpacing: "0.12em", textTransform: "uppercase",
               marginBottom: 12, fontFamily: "'IBM Plex Mono', monospace",
-            }}>Estimated build cost</div>
+            }}><Tip text="Total cost to build from scratch with human developers. Based on COCOMO II effort model × per-language market hourly rates. Excludes PM, QA, design, and DevOps overhead.">Estimated build cost</Tip></div>
             <div style={{
               fontSize: "clamp(52px, 12vw, 76px)", fontWeight: 700,
               letterSpacing: "-0.04em", lineHeight: 1, color: "#fff", marginBottom: 6,
@@ -409,21 +437,21 @@ export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
               {bigUnit && <span style={{ fontSize: "0.42em", color: "#555", marginLeft: 8, fontWeight: 400 }}>{bigUnit}</span>}
             </div>
             <div style={{ fontSize: 13, color: "#444", marginBottom: 28, fontFamily: "'IBM Plex Mono', monospace" }}>
-              range: {fmtCost(result.lo.cost)} – {fmtCost(result.hi.cost)}
+              <Tip text="Low estimate uses 0.6× cost. High uses 1.8× cost — reflecting COCOMO II's typical variance for unknown project factors.">range: {fmtCost(result.lo.cost)} – {fmtCost(result.hi.cost)}</Tip>
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {[
-                { l: "Person-months", v: result.pm.toFixed(1) },
-                { l: "Schedule", v: fmtDur(result.months) },
-                { l: "Team", v: result.team.toFixed(1) + " devs" },
-                { l: "SLOC", v: fmt(result.sloc) },
-                { l: "Hours", v: fmt(result.hours) },
+                { l: "Person-months", v: result.pm.toFixed(1), t: "COCOMO II effort: 2.94 × (KSLOC)^1.10. One person-month = 152 working hours (excludes holidays/vacation)." },
+                { l: "Schedule", v: fmtDur(result.months), t: "COCOMO II optimal schedule: 3.67 × (PM)^0.33 months. The minimum calendar time regardless of team size." },
+                { l: "Team", v: result.team.toFixed(1) + " devs", t: "Average team size = person-months ÷ schedule. Actual teams ramp up and down over the project." },
+                { l: "SLOC", v: fmt(result.sloc), t: "Effective source lines of code after complexity weighting. HTML/CSS/JSON excluded. SQL/IaC counted at 30%." },
+                { l: "Hours", v: fmt(result.hours), t: "Total effort = person-months × 152 hours. Distributed across languages by their share of effective SLOC." },
               ].map(s => (
                 <div key={s.l} style={{
                   padding: "7px 12px", background: "rgba(255,255,255,0.04)",
                   border: "1px solid rgba(255,255,255,0.05)", borderRadius: 8, fontSize: 12,
                 }}>
-                  <span style={{ color: "#555" }}>{s.l} </span>
+                  <Tip text={s.t}><span style={{ color: "#555" }}>{s.l}</span></Tip>{" "}
                   <span style={{ color: "#bbb", fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace" }}>{s.v}</span>
                 </div>
               ))}
@@ -468,7 +496,7 @@ export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
             <div style={{
               fontSize: 10, color: "#444", letterSpacing: "0.12em", textTransform: "uppercase",
               marginBottom: 12, paddingLeft: 8, fontFamily: "'IBM Plex Mono', monospace",
-            }}>Cost by language</div>
+            }}><Tip text="Each language's share of effort hours × its market hourly rate. Hover bars for detail.">Cost by language</Tip></div>
             <ResponsiveContainer width="100%" height={Math.max(140, topLangs.length * 34)}>
               <BarChart data={topLangs} layout="vertical" margin={{ left: 76, right: 12 }}>
                 <XAxis type="number" tick={{ fill: "#333", fontSize: 10 }} tickFormatter={fmtCost} axisLine={false} tickLine={false} />
@@ -512,12 +540,20 @@ export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
                 <thead>
                   <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                    {["Language", "SLOC", "Wt", "Eff.", "$/hr", "Hours", "Cost"].map((h, i) => (
-                      <th key={h} style={{
+                    {[
+                      { h: "Language", t: "" },
+                      { h: "SLOC", t: "Raw source lines estimated from GitHub byte count ÷ bytes-per-line for each language." },
+                      { h: "Wt", t: "Complexity weight relative to C (1.0×). Rust is 1.4×, Java 0.8×, etc." },
+                      { h: "Eff.", t: "Effective SLOC = raw SLOC × weight. This feeds the COCOMO II formula." },
+                      { h: "$/hr", t: "Blended mid-level North American hourly rate (2024–25 market data)." },
+                      { h: "Hours", t: "This language's proportional share of total COCOMO II effort hours." },
+                      { h: "Cost", t: "Hours × hourly rate for this language." },
+                    ].map((col, i) => (
+                      <th key={col.h} style={{
                         textAlign: i ? "right" : "left", padding: "5px 6px",
                         color: "#444", fontSize: 9, letterSpacing: "0.08em",
                         textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace",
-                      }}>{h}</th>
+                      }}>{col.t ? <Tip text={col.t}>{col.h}</Tip> : col.h}</th>
                     ))}
                   </tr>
                 </thead>
