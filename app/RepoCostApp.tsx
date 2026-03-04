@@ -255,11 +255,12 @@ export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
   const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
 
   useEffect(() => {
+    if (phase !== "input") return;
     fetch("/api/recent")
       .then((r) => r.ok ? r.json() : [])
       .then((data) => setRecentSearches(data))
       .catch(() => {});
-  }, []);
+  }, [phase]);
 
   const analyze = useCallback(async (repoStr?: string) => {
     const val = repoStr || input;
