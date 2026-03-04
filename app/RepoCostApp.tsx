@@ -75,7 +75,7 @@ function Tip({ text, children }: { text: string; children: React.ReactNode }) {
 function drawReceipt(canvas: HTMLCanvasElement, data: Estimate, meta: RepoMeta) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
-  const W = 600, H = 780;
+  const W = 1200, H = 600;
   canvas.width = W * 2; canvas.height = H * 2;
   ctx.scale(2, 2);
 
@@ -83,126 +83,144 @@ function drawReceipt(canvas: HTMLCanvasElement, data: Estimate, meta: RepoMeta) 
   ctx.fillRect(0, 0, W, H);
 
   // Grid
-  ctx.strokeStyle = "rgba(255,255,255,0.015)";
+  ctx.strokeStyle = "rgba(255,255,255,0.02)";
   ctx.lineWidth = 1;
-  for (let i = 0; i < W; i += 24) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, H); ctx.stroke(); }
-  for (let i = 0; i < H; i += 24) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(W, i); ctx.stroke(); }
+  for (let i = 0; i < W; i += 30) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, H); ctx.stroke(); }
+  for (let i = 0; i < H; i += 30) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(W, i); ctx.stroke(); }
 
   // Glow
-  const grad = ctx.createRadialGradient(W - 40, 40, 0, W - 40, 40, 200);
-  grad.addColorStop(0, "rgba(59,130,246,0.07)");
+  const grad = ctx.createRadialGradient(280, 220, 0, 280, 220, 350);
+  grad.addColorStop(0, "rgba(59,130,246,0.08)");
   grad.addColorStop(1, "transparent");
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, W, H);
 
-  let y = 44;
-  const L = 36, R = W - 36;
   const font = (weight: string, size: number, family = "-apple-system, sans-serif") =>
     `${weight} ${size}px ${family}`;
+  const MID = 620; // column divider
+  const L = 52, R = W - 52;
+
+  // ── LEFT COLUMN ──
 
   // Header
-  ctx.fillStyle = "#fff"; ctx.font = font("bold", 22);
+  let y = 52;
+  ctx.fillStyle = "#fff"; ctx.font = font("bold", 26);
   ctx.fillText("repocost", L, y);
-  ctx.fillStyle = "#444"; ctx.font = font("normal", 11, "'Courier New', monospace");
-  ctx.fillText("COCOMO II", 140, y);
-  y += 20;
+  ctx.fillStyle = "#666"; ctx.font = font("normal", 13, "'Courier New', monospace");
+  ctx.fillText("COCOMO II", L + 160, y);
+  y += 36;
 
-  ctx.strokeStyle = "rgba(255,255,255,0.08)";
-  ctx.setLineDash([3, 5]); ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke(); ctx.setLineDash([]);
-  y += 28;
-
-  // Repo
-  ctx.fillStyle = "#fff"; ctx.font = font("bold", 20);
-  ctx.fillText(meta.full_name, L, y); y += 22;
+  // Repo name
+  ctx.fillStyle = "#fff"; ctx.font = font("bold", 24);
+  ctx.fillText(meta.full_name, L, y); y += 24;
   if (meta.description) {
-    ctx.fillStyle = "#555"; ctx.font = font("normal", 13);
-    const desc = meta.description.length > 65 ? meta.description.slice(0, 62) + "…" : meta.description;
-    ctx.fillText(desc, L, y); y += 16;
+    ctx.fillStyle = "#888"; ctx.font = font("normal", 14);
+    const desc = meta.description.length > 55 ? meta.description.slice(0, 52) + "…" : meta.description;
+    ctx.fillText(desc, L, y); y += 20;
   }
   if (meta.stargazers_count || meta.forks_count) {
-    ctx.fillStyle = "#444"; ctx.font = font("normal", 12);
+    ctx.fillStyle = "#666"; ctx.font = font("normal", 13);
     let info = "";
     if (meta.stargazers_count) info += `★ ${fmt(meta.stargazers_count)}`;
     if (meta.forks_count) info += `  ⑂ ${fmt(meta.forks_count)}`;
-    ctx.fillText(info.trim(), L, y); y += 14;
+    ctx.fillText(info.trim(), L, y);
   }
-  y += 16;
+  y += 36;
 
   // Big cost
   const [bigNum, bigUnit] = fmtBigCost(data.cost);
-  ctx.fillStyle = "#fff"; ctx.font = font("bold", 68);
-  ctx.fillText(bigNum, L, y + 56);
+  ctx.fillStyle = "#fff"; ctx.font = font("bold", 82);
+  ctx.fillText(bigNum, L, y + 64);
   if (bigUnit) {
     const nw = ctx.measureText(bigNum).width;
-    ctx.fillStyle = "#555"; ctx.font = font("normal", 30);
-    ctx.fillText(bigUnit, L + nw + 10, y + 56);
+    ctx.fillStyle = "#888"; ctx.font = font("normal", 34);
+    ctx.fillText(bigUnit, L + nw + 12, y + 64);
   }
-  y += 78;
-  ctx.fillStyle = "#444"; ctx.font = font("normal", 13);
+  y += 88;
+  ctx.fillStyle = "#777"; ctx.font = font("normal", 15);
   ctx.fillText("estimated build cost (human developers only)", L, y);
-  y += 34;
+  y += 38;
 
-  // Stats
-  ctx.strokeStyle = "rgba(255,255,255,0.06)";
-  ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke();
-  y += 22;
+  // Stats row
+  ctx.strokeStyle = "rgba(255,255,255,0.1)";
+  ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(MID - 40, y); ctx.stroke();
+  y += 24;
   const stats = [
     ["PERSON-MONTHS", data.pm.toFixed(1)],
     ["SCHEDULE", fmtDur(data.months)],
-    ["TEAM SIZE", data.team.toFixed(1) + " devs"],
-    ["EFF. SLOC", fmt(data.sloc)],
+    ["TEAM", data.team.toFixed(1) + " devs"],
+    ["SLOC", fmt(data.sloc)],
   ];
-  const colW = (R - L) / 4;
+  const colW = (MID - 40 - L) / 4;
   stats.forEach(([label, val], i) => {
     const x = L + i * colW;
-    ctx.fillStyle = "#444"; ctx.font = font("bold", 9, "'Courier New', monospace");
+    ctx.fillStyle = "#888"; ctx.font = font("bold", 10, "'Courier New', monospace");
     ctx.fillText(label, x, y);
-    ctx.fillStyle = "#ddd"; ctx.font = font("bold", 20);
-    ctx.fillText(val, x, y + 24);
+    ctx.fillStyle = "#eee"; ctx.font = font("bold", 22);
+    ctx.fillText(val, x, y + 28);
   });
-  y += 50;
-  ctx.strokeStyle = "rgba(255,255,255,0.06)";
-  ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke();
-  y += 22;
 
-  // Bars
-  ctx.fillStyle = "#444"; ctx.font = font("bold", 9, "'Courier New', monospace");
-  ctx.fillText("COST BY LANGUAGE", L, y); y += 18;
+  // Range + footer
+  y += 64;
+  ctx.fillStyle = "#777"; ctx.font = font("normal", 13);
+  ctx.fillText(`Range: ${fmtCost(data.lo.cost)} – ${fmtCost(data.hi.cost)}`, L, y);
+  y += 28;
+  ctx.strokeStyle = "rgba(255,255,255,0.1)";
+  ctx.setLineDash([3, 5]); ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(MID - 40, y); ctx.stroke(); ctx.setLineDash([]);
+  y += 20;
+  ctx.fillStyle = "#555"; ctx.font = font("normal", 12);
+  ctx.fillText("repocost.dev · COCOMO II · per-language market rates", L, y);
+
+  // ── RIGHT COLUMN: language bars ──
+
+  // Divider
+  ctx.strokeStyle = "rgba(255,255,255,0.06)";
+  ctx.beginPath(); ctx.moveTo(MID, 52); ctx.lineTo(MID, H - 52); ctx.stroke();
+
+  let ry = 52;
+  ctx.fillStyle = "#888"; ctx.font = font("bold", 11, "'Courier New', monospace");
+  ctx.fillText("COST BY LANGUAGE", MID + 36, ry);
+  ry += 28;
+
   const top6 = data.langs.slice(0, 6);
   const maxC = Math.max(...top6.map(l => l.cost));
+  const barL = MID + 36, barR = R;
+  const barH = 36;
+  const barGap = 6;
   top6.forEach(l => {
-    const barMaxW = R - L;
+    const barMaxW = barR - barL;
     const barW = maxC > 0 ? barMaxW * (l.cost / maxC) : 0;
-    ctx.fillStyle = "rgba(255,255,255,0.025)";
+    // Track background
+    ctx.fillStyle = "rgba(255,255,255,0.04)";
     ctx.beginPath();
-    if (ctx.roundRect) { ctx.roundRect(L, y, barMaxW, 26, 4); } else { ctx.rect(L, y, barMaxW, 26); }
+    if (ctx.roundRect) { ctx.roundRect(barL, ry, barMaxW, barH, 6); } else { ctx.rect(barL, ry, barMaxW, barH); }
     ctx.fill();
-    if (barW > 4) {
-      ctx.fillStyle = l.color + "44";
+    // Filled bar
+    if (barW > 6) {
+      ctx.fillStyle = l.color + "55";
       ctx.beginPath();
-      if (ctx.roundRect) { ctx.roundRect(L, y, barW, 26, 4); } else { ctx.rect(L, y, barW, 26); }
+      if (ctx.roundRect) { ctx.roundRect(barL, ry, barW, barH, 6); } else { ctx.rect(barL, ry, barW, barH); }
       ctx.fill();
     }
+    // Color accent
     ctx.fillStyle = l.color;
     ctx.beginPath();
-    if (ctx.roundRect) { ctx.roundRect(L, y, 3, 26, [4, 0, 0, 4]); } else { ctx.rect(L, y, 3, 26); }
+    if (ctx.roundRect) { ctx.roundRect(barL, ry, 4, barH, [6, 0, 0, 6]); } else { ctx.rect(barL, ry, 4, barH); }
     ctx.fill();
-    ctx.fillStyle = "#ccc"; ctx.font = font("normal", 12);
-    ctx.fillText(l.name, L + 12, y + 17);
-    ctx.fillStyle = "#999"; ctx.font = font("bold", 12, "'Courier New', monospace");
+    // Label
+    ctx.fillStyle = "#ddd"; ctx.font = font("600", 14);
+    ctx.fillText(l.name, barL + 14, ry + 23);
+    // Cost
+    ctx.fillStyle = "#bbb"; ctx.font = font("bold", 14, "'Courier New', monospace");
     const cs = fmtCost(l.cost);
-    ctx.fillText(cs, R - ctx.measureText(cs).width - 8, y + 17);
-    y += 32;
+    ctx.fillText(cs, barR - ctx.measureText(cs).width - 10, ry + 23);
+    ry += barH + barGap;
   });
 
-  y += 6;
-  ctx.fillStyle = "#333"; ctx.font = font("normal", 12);
-  ctx.fillText(`Range: ${fmtCost(data.lo.cost)} – ${fmtCost(data.hi.cost)}`, L, y); y += 22;
-  ctx.strokeStyle = "rgba(255,255,255,0.06)";
-  ctx.setLineDash([3, 5]); ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke(); ctx.setLineDash([]);
-  y += 18;
-  ctx.fillStyle = "#333"; ctx.font = font("normal", 11);
-  ctx.fillText("repocost · COCOMO II model · per-language market rates", L, y);
+  // Hours total
+  ry += 10;
+  ctx.fillStyle = "#777"; ctx.font = font("normal", 13);
+  ctx.fillText(`${fmt(data.hours)} total hours`, barL, ry);
 }
 
 // ─── Main Component ─────────────────────────────────────────────────────────

@@ -57,7 +57,7 @@ export async function GET(_req: Request, { params }: Params) {
           <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "12px" }}>
             <div style={{ fontSize: "28px", fontWeight: 800, color: "#ffffff" }}>repocost</div>
             <div style={{
-              fontSize: "14px", color: "#555",
+              fontSize: "14px", color: "#777",
               background: "rgba(255,255,255,0.06)", padding: "4px 10px", borderRadius: "6px",
             }}>
               COCOMO II
@@ -65,7 +65,7 @@ export async function GET(_req: Request, { params }: Params) {
           </div>
 
           {/* Repo name */}
-          <div style={{ fontSize: "22px", fontWeight: 700, color: "#ccc", marginBottom: "32px" }}>
+          <div style={{ fontSize: "22px", fontWeight: 700, color: "#fff", marginBottom: "32px" }}>
             {data.meta.full_name}
           </div>
 
@@ -75,13 +75,13 @@ export async function GET(_req: Request, { params }: Params) {
               {bigNum}
             </div>
             {bigUnit && (
-              <div style={{ fontSize: "36px", color: "#555", fontWeight: 400 }}>
+              <div style={{ fontSize: "36px", color: "#888", fontWeight: 400 }}>
                 {bigUnit}
               </div>
             )}
           </div>
 
-          <div style={{ fontSize: "18px", color: "#444", marginBottom: "36px" }}>
+          <div style={{ fontSize: "18px", color: "#777", marginBottom: "36px" }}>
             estimated cost to build with human developers
           </div>
 
@@ -97,7 +97,7 @@ export async function GET(_req: Request, { params }: Params) {
               ["SLOC", fmt(est.sloc)],
             ].map(([label, value]) => (
               <div key={label as string} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                <div style={{ fontSize: "12px", color: "#555", textTransform: "uppercase", letterSpacing: "1px" }}>
+                <div style={{ fontSize: "12px", color: "#888", textTransform: "uppercase", letterSpacing: "1px" }}>
                   {label}
                 </div>
                 <div style={{ fontSize: "24px", fontWeight: 700, color: "#ddd" }}>{value}</div>
@@ -128,7 +128,7 @@ export async function GET(_req: Request, { params }: Params) {
 
           {/* Range footer */}
           <div style={{
-            marginTop: "auto", fontSize: "14px", color: "#333",
+            marginTop: "auto", fontSize: "14px", color: "#777",
           }}>
             Range: {fmtCost(est.lo.cost)} – {fmtCost(est.hi.cost)}
           </div>
