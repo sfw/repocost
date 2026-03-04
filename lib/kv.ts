@@ -1,6 +1,7 @@
 import { Redis } from "@upstash/redis";
 
 const KEY = "recent_searches";
+const DATA_KEY = "recent_searches:data";
 
 export interface RecentSearch {
   repo: string;
@@ -21,12 +22,9 @@ export async function recordSearch(entry: RecentSearch): Promise<void> {
     const redis = getRedis();
     if (!redis) return;
 
-    const dedupKey = `dedup:${entry.repo}`;
-    const already = await redis.get(dedupKey);
-    if (already) return;
-
-    await redis.set(dedupKey, 1, { ex: 3600 }); // 1hr dedup
-    await redis.zadd(KEY, { score: entry.ts, member: JSON.stringify(entry) });
+    // Use repo name as the sorted set member — re-searching updates score + data, no duplicates
+    await redis.zadd(KEY, { score: entry.ts, member: entry.repo });
+    await redis.hset(DATA_KEY, { [entry.repo]: JSON.stringify({ cost: entry.cost, stars: entry.stars }) });
     await redis.zremrangebyrank(KEY, 0, -21); // keep newest 20
   } catch {
     // Redis unavailable — silently ignore
@@ -38,10 +36,24 @@ export async function getRecentSearches(): Promise<RecentSearch[]> {
     const redis = getRedis();
     if (!redis) return [];
 
-    const raw = await redis.zrange(KEY, 0, -1, { rev: true });
-    return (raw as (string | RecentSearch)[]).map((item) =>
-      typeof item === "string" ? JSON.parse(item) : item
-    );
+    // Get repos newest-first with their scores (timestamps)
+    const raw = await redis.zrange(KEY, 0, -1, { rev: true, withScores: true });
+    // raw is [member, score, member, score, ...]
+    const repos: { repo: string; ts: number }[] = [];
+    for (let i = 0; i < raw.length; i += 2) {
+      repos.push({ repo: raw[i] as string, ts: raw[i + 1] as number });
+    }
+    if (repos.length === 0) return [];
+
+    // Batch-fetch metadata
+    const fields = repos.map((r) => r.repo);
+    const meta = await redis.hmget(DATA_KEY, ...fields) ?? {};
+
+    return repos.map((r) => {
+      const raw = meta?.[r.repo];
+      const data = typeof raw === "string" ? JSON.parse(raw) : (raw ?? { cost: 0, stars: 0 });
+      return { repo: r.repo, cost: data.cost, stars: data.stars, ts: r.ts };
+    });
   } catch {
     return [];
   }
