@@ -723,7 +723,7 @@ export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
         <img
           src="/hacked.webp"
           alt="Hacked Podcast"
-          style={{ height: 28, width: "auto", filter: "invert(1) brightness(0.75)" }}
+          style={{ height: 28, width: "auto", mixBlendMode: "screen", filter: "brightness(0.75)" }}
         />
       </a>
     </div>
