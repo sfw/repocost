@@ -46,6 +46,37 @@ button:active {
   }
 }
 
+.sponsor-badge {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.sponsor-badge:hover {
+  opacity: 1;
+}
+
+.sponsor-badge-label {
+  display: block;
+}
+
+@media (max-width: 600px) {
+  .sponsor-badge {
+    bottom: 12px;
+    right: 12px;
+  }
+  .sponsor-badge-label {
+    display: none;
+  }
+}
+
 @keyframes fadeUp {
   from {
     opacity: 0;

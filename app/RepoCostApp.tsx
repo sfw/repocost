@@ -703,16 +703,9 @@ export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
         href="https://www.hackedpodcast.com"
         target="_blank"
         rel="noopener noreferrer"
-        style={{
-          position: "fixed", bottom: 20, right: 20, zIndex: 100,
-          display: "flex", alignItems: "center", gap: 8,
-          textDecoration: "none", opacity: 0.6,
-          transition: "opacity 0.2s",
-        }}
-        onMouseEnter={e => (e.currentTarget.style.opacity = "1")}
-        onMouseLeave={e => (e.currentTarget.style.opacity = "0.6")}
+        className="sponsor-badge"
       >
-        <span style={{
+        <span className="sponsor-badge-label" style={{
           fontSize: 10, color: "#666", letterSpacing: "0.1em",
           textTransform: "uppercase", fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
           whiteSpace: "nowrap",
