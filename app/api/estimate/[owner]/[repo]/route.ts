@@ -29,9 +29,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
     const est = estimate(data.languages);
 
-    void recordSearch({ repo: `${owner}/${repo}`, cost: est.cost, stars: data.meta.stargazers_count, ts: Date.now() });
-
-    return NextResponse.json(
+    const response = NextResponse.json(
       { meta: data.meta, estimate: est },
       {
         status: 200,
@@ -41,6 +39,11 @@ export async function GET(_req: NextRequest, { params }: Params) {
         },
       }
     );
+
+    // Record after building response — awaited so it completes before the edge function exits
+    await recordSearch({ repo: `${owner}/${repo}`, cost: est.cost, stars: data.meta.stargazers_count, ts: Date.now() });
+
+    return response;
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
     const status = message.includes("not found") ? 404
