@@ -345,7 +345,7 @@ export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
 
           <div style={{ position: "relative", zIndex: 1, textAlign: "center", maxWidth: 520, width: "100%" }}>
             <div style={{
-              fontSize: 12, color: "#444", letterSpacing: "0.14em", textTransform: "uppercase",
+              fontSize: 12, color: "#777", letterSpacing: "0.14em", textTransform: "uppercase",
               marginBottom: 20, fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
             }}>
               What would it actually cost to build?
@@ -358,7 +358,7 @@ export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
             }}>
               repocost
             </h1>
-            <p style={{ fontSize: 16, color: "#555", margin: "0 0 44px", lineHeight: 1.5 }}>
+            <p style={{ fontSize: 16, color: "#888", margin: "0 0 44px", lineHeight: 1.5 }}>
               Estimate the human time and money behind any<br />
               GitHub repo. Powered by COCOMO II.
             </p>
@@ -409,9 +409,9 @@ export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
                 <button key={r}
                   onClick={() => { setInput(r); analyze(r); }}
                   style={{
-                    padding: "5px 12px", background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8,
-                    color: "#444", fontSize: 12, cursor: "pointer",
+                    padding: "5px 12px", background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8,
+                    color: "#888", fontSize: 12, cursor: "pointer",
                     fontFamily: "'IBM Plex Mono', monospace", transition: "all 0.15s",
                   }}
                 >{r}</button>
@@ -421,7 +421,7 @@ export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
             {recentSearches.length > 0 && (
               <div style={{ marginTop: 40, width: "100%" }}>
                 <div style={{
-                  fontSize: 10, color: "#333", letterSpacing: "0.12em", textTransform: "uppercase",
+                  fontSize: 10, color: "#777", letterSpacing: "0.12em", textTransform: "uppercase",
                   marginBottom: 10, fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
                 }}>
                   Recently analyzed
@@ -433,25 +433,25 @@ export default function RepoCostApp({ initialOwner, initialRepo }: Props) {
                       onClick={() => { setInput(s.repo); analyze(s.repo); }}
                       style={{
                         width: "100%", padding: "8px 14px",
-                        background: "rgba(255,255,255,0.02)",
-                        border: "1px solid rgba(255,255,255,0.04)",
+                        background: "rgba(255,255,255,0.03)",
+                        border: "1px solid rgba(255,255,255,0.07)",
                         borderRadius: 8, cursor: "pointer",
                         display: "flex", alignItems: "center", gap: 10,
                         transition: "all 0.15s", textAlign: "left",
                       }}
                     >
                       <span style={{
-                        flex: 1, fontSize: 12, color: "#666",
+                        flex: 1, fontSize: 12, color: "#aaa",
                         fontFamily: "'IBM Plex Mono', monospace",
                         overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                       }}>{s.repo}</span>
-                      <span style={{ fontSize: 11, color: "#444", fontFamily: "'IBM Plex Mono', monospace", fontWeight: 600 }}>
+                      <span style={{ fontSize: 11, color: "#999", fontFamily: "'IBM Plex Mono', monospace", fontWeight: 600 }}>
                         {fmtCost(s.cost)}
                       </span>
                       {s.stars > 0 && (
-                        <span style={{ fontSize: 10, color: "#333" }}>★ {fmt(s.stars)}</span>
+                        <span style={{ fontSize: 10, color: "#777" }}>★ {fmt(s.stars)}</span>
                       )}
-                      <span style={{ fontSize: 10, color: "#2a2a2a", whiteSpace: "nowrap" }}>{timeAgo(s.ts)}</span>
+                      <span style={{ fontSize: 10, color: "#666", whiteSpace: "nowrap" }}>{timeAgo(s.ts)}</span>
                     </button>
                   ))}
                 </div>
