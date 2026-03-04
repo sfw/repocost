@@ -22,7 +22,7 @@ Estimate the human effort and cost to build any GitHub repository from scratch. 
 
 ```bash
 # 1. Clone and install
-git clone <your-repo-url> repocost
+git clone https://github.com/sfw/repocost.git
 cd repocost
 npm install
 
@@ -39,7 +39,7 @@ npx vercel
 
 Or just click:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/YOUR_USERNAME/repocost&env=GITHUB_TOKEN,NEXT_PUBLIC_URL)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/sfw/repocost&env=GITHUB_TOKEN,NEXT_PUBLIC_URL)
 
 ## Environment Variables
 
