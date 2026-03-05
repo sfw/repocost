@@ -8,6 +8,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  icons: { icon: "/favicon.svg" },
   title: "repocost — What would it cost to build?",
   description:
     "Estimate the human time and money behind any GitHub repo. Powered by COCOMO II with per-language market rates.",
